@@ -8,7 +8,9 @@ import getMyIP.repository.IpRepository;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.sql.Date;
 import java.util.Properties;
 
@@ -37,28 +39,53 @@ public class Runner {
   @Autowired
   private HistoryRepository historyRepo;
 
-  @Value("${username}")
-  private String username;
+  @Value("${email}")
+  private String email;
   @Value("${password}")
   private String password;
 
   public Runner() {
   }
 
-  @Scheduled(fixedDelay = 300_000) //15 mins
-  // @Scheduled(fixedDelay = 1_800_000)
-  // 30 mins
-  public void doSomething() {
+  @Scheduled(fixedDelay = 300_000)
+  // 15 mins
+  public void doSomething() throws UnknownHostException {
     checkMyIP();
   }
 
-  private void checkMyIP() {
+  private void checkMyIP() throws UnknownHostException {
+    String inputLine = "";
+
+    String hostName = InetAddress.getLocalHost().getHostName();
+    Date now = new Date(System.currentTimeMillis());
+
+    boolean inError = false;
+
     try {
       URL oracle = new URL("http://checkip.dyndns.org/");
       BufferedReader in = new BufferedReader(new InputStreamReader(oracle.openStream()));
-      String inputLine = in.readLine();
+      inputLine = in.readLine();
       in.close();
+    } catch (IOException e) {
+      log.error("Check failed for host: " + hostName + " with: " + e);
+      inError = true;
+    }
 
+    Ip lastValidEntry = repo.findByHostname(hostName);
+
+    if (inError) {
+      if (lastValidEntry == null) {
+        lastValidEntry = new Ip();
+        lastValidEntry.setChangeDate(now);
+        lastValidEntry.setHostname(hostName);
+        lastValidEntry.setLastChecked(now);
+        lastValidEntry.setIp("");
+      } else {
+        lastValidEntry.setChecks(lastValidEntry.getChecks() + 1);
+        lastValidEntry.setLastChecked(now);
+      }
+      lastValidEntry.setFailures(lastValidEntry.getFailures() + 1);
+    } else {
       int startIndex = inputLine.indexOf("Current IP Address: ");
       int endIndex = inputLine.indexOf("</body></html>");
 
@@ -67,55 +94,53 @@ public class Runner {
       int startIndex1 = substring.indexOf(": ");
       String myIp = substring.substring(startIndex1 + 2, substring.length());
 
-      Ip lastValidEntry = repo.findFirst1ByOrderByIdDesc();
-
       if (lastValidEntry == null) {
-        Ip myNewIp = new Ip();
-        myNewIp.setDate(new Date(System.currentTimeMillis()));
-        myNewIp.setIp(myIp);
-        repo.save(myNewIp);
+        lastValidEntry = new Ip();
+        lastValidEntry.setChangeDate(now);
+        lastValidEntry.setIp(myIp);
+        lastValidEntry.setHostname(hostName);
+        lastValidEntry.setLastChecked(now);
         log.info("No existing IP found.  Saving current IP: " + myIp);
       } else {
         if (!lastValidEntry.getIp().equals(myIp)) {
-          Ip myNewIp = new Ip();
-          myNewIp.setDate(new Date(System.currentTimeMillis()));
-          myNewIp.setIp(myIp);
-          repo.save(myNewIp);
-
-          log.info("Old IP was: " + lastValidEntry.getIp() + " and now replacing with a new IP: " + myNewIp.getIp());
+          lastValidEntry.setChecks(lastValidEntry.getChecks() + 1);
+          lastValidEntry.setLastChecked(now);
+          log.info("Old IP was: " + lastValidEntry.getIp() + " and now replacing with a new IP: " + lastValidEntry.getIp());
+          lastValidEntry.setIp(myIp);
           sendEmail(myIp);
         } else {
+          lastValidEntry.setChecks(lastValidEntry.getChecks() + 1);
+          lastValidEntry.setLastChecked(now);
           log.info("IP has not changed, still: " + myIp);
         }
       }
-    } catch (IOException e) {
-      log.info("Ip check failed: " + e.getMessage());
-    } finally {
-      History findOne = historyRepo.findOne(1L);
-      int checks = findOne.getChecks();
-      findOne.setChecks(checks + 1);
-      historyRepo.save(findOne);
     }
+
+    repo.save(lastValidEntry);
+    History findOne = historyRepo.findOne(1L);
+    int checks = findOne.getChecks();
+    findOne.setChecks(checks + 1);
+    historyRepo.save(findOne);
   }
 
   private void sendEmail(String ip) {
     try {
-
       Properties props = new Properties();
       props.put("mail.smtp.starttls.enable", "true");
       props.put("mail.smtp.auth", "true");
       props.put("mail.smtp.host", "smtp.gmail.com");
       props.put("mail.smtp.port", "587");
+      props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 
       Session session = Session.getInstance(props, new javax.mail.Authenticator() {
         protected PasswordAuthentication getPasswordAuthentication() {
-          return new PasswordAuthentication(username, password);
+          return new PasswordAuthentication(email, password);
         }
       });
 
       Message message = new MimeMessage(session);
-      message.setFrom(new InternetAddress(username));
-      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(username));
+      message.setFrom(new InternetAddress(email));
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
       message.setSubject("My IP changed to: " + ip);
       message.setText("My IP: " + ip);
       Transport.send(message);

@@ -2,24 +2,16 @@ package getMyIP;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-@Configuration
-@EnableAutoConfiguration
-@ComponentScan
-@EnableAsync
 @EnableScheduling
-public class GetMyIPApp extends SpringBootServletInitializer {
+@SpringBootApplication
+public class Application extends SpringBootServletInitializer {
 
   @Value("${c3p0.max_size:2}")
   private int maxSize;
@@ -46,21 +38,8 @@ public class GetMyIPApp extends SpringBootServletInitializer {
   @Value("${spring.datasource.password}")
   private String dbPassword;
   
-
-  @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-    return application.sources(GetMyIPApp.class);
-  }
-
   public static void main(final String[] args) {
-    SpringApplication.run(GetMyIPApp.class, args);
-  }
-
-  @Bean
-  public ServletRegistrationBean atmosphereServlet() {
-    ServletRegistrationBean registration = new ServletRegistrationBean(new GetMyIpServlet(), "/stats");
-    registration.setLoadOnStartup(1);
-    return registration;
+    SpringApplication.run(Application.class, args);
   }
 
   @Bean
