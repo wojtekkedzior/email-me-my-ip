@@ -32,8 +32,10 @@ public class GetMyIpServlet {
     String hostName = InetAddress.getLocalHost().getHostName();
     Ip lastIp = repo.findByHostname(hostName);
 
-    String res = new String("<p>CurrentIP: " + lastIp.getIp() + " changed on: " + lastIp.getChangeDate() + "</p>\n");
+    StringBuffer res = new StringBuffer();
+    res.append("<p>Current IP: " + lastIp.getIp() + "  changed on: " + lastIp.getChangeDate() + "</p>\n");
+    res.append("<p>Total checks: " + lastIp.getChecks() + " failures: " + lastIp.getFailures() + " last checked at: " + lastIp.getLastChecked() + "</p>\n");
 
-    return new ResponseEntity<String>(res, HttpStatus.OK);
+    return new ResponseEntity<String>(res.toString(), HttpStatus.OK);
   }
 }
