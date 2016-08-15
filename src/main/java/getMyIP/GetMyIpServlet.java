@@ -34,7 +34,7 @@ public class GetMyIpServlet {
 
     StringBuffer res = new StringBuffer();
     res.append("<p>Current IP: " + lastIp.getIp() + "  changed on: " + lastIp.getChangeDate() + "</p>\n");
-    res.append("<p>Total checks: " + lastIp.getChecks() + " failures: " + lastIp.getFailures() + " last checked at: " + lastIp.getLastChecked() + "</p>\n");
+    res.append("<p>Total checks: " + lastIp.getChecks() + ".  Failures: " + lastIp.getFailures() + ".  Last checked at: " + lastIp.getLastChecked() + "</p>\n");
 
     return new ResponseEntity<String>(res.toString(), HttpStatus.OK);
   }
