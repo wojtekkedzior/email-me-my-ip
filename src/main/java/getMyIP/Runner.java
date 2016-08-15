@@ -105,7 +105,7 @@ public class Runner {
         if (!lastValidEntry.getIp().equals(myIp)) {
           lastValidEntry.setChecks(lastValidEntry.getChecks() + 1);
           lastValidEntry.setLastChecked(now);
-          log.info("Old IP was: " + lastValidEntry.getIp() + " and now replacing with a new IP: " + lastValidEntry.getIp());
+          log.info("Old IP was: " + lastValidEntry.getIp() + " and now replacing with a new IP: " + myIp);
           lastValidEntry.setIp(myIp);
           sendEmail(myIp);
         } else {
