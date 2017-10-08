@@ -1,0 +1,56 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+<title>Getting Started: Serving Web Content</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<p th:text="'Number of URLS: ' + ${numberOfUrls}" />
+
+	<table width="500">
+		<tr>
+			<td><label>ID</label></td>
+			<td><label>State</label></td>
+			<td><label>URL</label></td>
+			<td><label>Count</label></td>
+			<td><label>Last checked</label></td>
+			<td><label>Failures</label></td>
+			<td><label>Last Failure</label></td>
+		</tr>
+		<tr th:each="data, iterstat: ${urls}">
+			<td th:text="${data.id}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.state}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.url}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.count}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.lastChecked}" th:id="|td${iterstat.index}|"></td>
+
+			<td th:text="${data.failures}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.lastFailure}" th:id="|td${iterstat.index}|"></td>
+		</tr>
+	</table>
+
+	<p th:text="'Total Checks: ' + ${totalChecks}" />
+
+	<div>
+		<table width="500">
+			<tr>
+				<td><label>Current IP</label></td>
+				<td><label>Last Checked</label></td>
+				<td><label>Checks</label></td>
+				<td><label>Failed Checks</label></td>
+				<td><label>Changed on</label></td>
+			</tr>
+			<tr>
+				<td th:text="${currentIp}" />
+				<td th:text="${lastChecked}" />
+				<td th:text="${numberOfChecks}" />
+				<td th:text="${numberOfFailedChecks}"/>
+				<td th:text="${ipChangeDate}"/>
+			</tr>
+		</table>
+	</div>
+</body>
+
+
+</html>

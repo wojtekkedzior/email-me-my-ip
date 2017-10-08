@@ -54,6 +54,7 @@ public class Application extends SpringBootServletInitializer {
       builder.append("?user=").append(dbUsername);
       builder.append("&password=").append(dbPassword);
       builder.append("&autoReconnect=true");
+      builder.append("&zeroDateTimeBehavior=convertToNull");
       return builder.toString();
   }
 
