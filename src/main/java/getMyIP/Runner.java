@@ -58,30 +58,30 @@ public class Runner {
 	public Runner() {
 	}
 
-	@Scheduled(fixedDelay = 100_000)
+	@Scheduled(fixedDelay = 1_800_000)
 	private void checkUrls() {
-		List<String> myList = Arrays.asList(urlsToCheck.split(","));
+		List<String> myList = Arrays.asList(urlsToCheck.split(", "));
 
 		for (String listedUrl : myList) {
+//			listedUrl = listedUrl.trim();
 			log.info("Checking URL: " + listedUrl);
+			URLHealthCheck findByUrl = urlCheckRepo.findByUrl(listedUrl);
+			
+			if (findByUrl == null) {
+				findByUrl = new URLHealthCheck();
+				findByUrl.setUrl(listedUrl);
+			}
+			
+			Date now = new Date(System.currentTimeMillis());
+			findByUrl.setLastChecked(now);
 
 			try {
-				URLHealthCheck findByUrl = urlCheckRepo.findByUrl(listedUrl);
-
 				URL url = new URL(listedUrl);
 				HttpURLConnection.setFollowRedirects(true);
 				HttpURLConnection http = (HttpURLConnection) url.openConnection();
 				log.info("URL: " + listedUrl + " returned: " + http.getResponseCode());
 
 				String state = http.getResponseCode() == 200 ? "up" : "down";
-
-				if (findByUrl == null) {
-					findByUrl = new URLHealthCheck();
-					findByUrl.setUrl(listedUrl);
-				}
-
-				Date now = new Date(System.currentTimeMillis());
-				findByUrl.setLastChecked(now);
 				
 				findByUrl.setState(state);
 
@@ -97,12 +97,23 @@ public class Runner {
 				urlCheckRepo.save(findByUrl);
 
 			} catch (IOException e) {
+				//duhh log an error here
+				
+				String state = "down";
+				findByUrl.setState(state);
+
+				findByUrl.setFailures(findByUrl.getFailures() +1);
+				findByUrl.setLastFailure(now);
+				findByUrl.setCount(findByUrl.getCount() + 1);
+
+				urlCheckRepo.save(findByUrl);
+				
 				log.error(e);
 			}
 		}
 	}
 
-	@Scheduled(fixedDelay = 300_000)
+	@Scheduled(fixedDelay = 1_800_000)
 	private void checkMyIP() throws UnknownHostException {
 		String inputLine = "";
 

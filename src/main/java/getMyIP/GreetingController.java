@@ -1,5 +1,6 @@
 package getMyIP;
 
+import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -31,38 +32,30 @@ public class GreetingController {
   
   @Autowired
   private URLCheckRepository urlCheckRepo;
-  
 
-//  @RequestMapping(method = RequestMethod.GET, value = "/stats")
-//  @ResponseBody
-//  public ResponseEntity<?> getstats() throws FileNotFoundException, UnknownHostException {
-//
-//    String hostName = InetAddress.getLocalHost().getHostName();
-//    Ip lastIp = repo.findByHostname(hostName);
-//
-//    StringBuffer res = new StringBuffer();
-//    res.append("<p>Current IP: " + lastIp.getIp() + "  changed on: " + lastIp.getChangeDate() + "</p>\n");
-//    res.append("<p>Total checks: " + lastIp.getChecks() + ".  Failures: " + lastIp.getFailures() + ".  Last  checked at: " + lastIp.getLastChecked() + "</p>\n");
-//
-//    
-//    return new ResponseEntity<String>(res.toString(), HttpStatus.OK);
-//  }
-  
+  @RequestMapping(method = RequestMethod.GET, value = "/stats")
+  @ResponseBody
+  public ResponseEntity<?> getstats() throws FileNotFoundException, UnknownHostException {
+
+    String hostName = InetAddress.getLocalHost().getHostName();
+    Ip lastIp = repo.findByHostname(hostName);
+
+    StringBuffer res = new StringBuffer();
+    res.append("<p>Current IP: " + lastIp.getIp() + "  changed on: " + lastIp.getChangeDate() + "</p>\n");
+    res.append("<p>Total checks: " + lastIp.getChecks() + ".  Failures: " + lastIp.getFailures() + ".  Last  checked at: " + lastIp.getLastChecked() + "</p>\n");
+    
+    return new ResponseEntity<String>(res.toString(), HttpStatus.OK);
+  }
   
   @RequestMapping("/greeting")
   public String greeting(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) throws UnknownHostException {
-      model.addAttribute("name", name);
-      model.addAttribute("wojtek", "blah");
-      
       String hostName = InetAddress.getLocalHost().getHostName();
-      Ip lastIp = repo.findByHostname(hostName);
       
-      model.addAttribute("currentIp", lastIp.getIp());
-      model.addAttribute("lastChecked", lastIp.getLastChecked());
+      Ip myIp = repo.findByHostname(hostName);
+      model.addAttribute("myIp", myIp.getIp());
       
-      model.addAttribute("numberOfChecks", lastIp.getChecks());
-      model.addAttribute("numberOfFailedChecks", lastIp.getFailures());
-      model.addAttribute("ipChangeDate", lastIp.getChangeDate());
+      Iterable<Ip> allCheckedIPs = repo.findAll();
+      model.addAttribute("allCheckedIPs", allCheckedIPs);
       
       History history = historyRepo.findOne(1l);
       model.addAttribute("totalChecks", history.getChecks());
@@ -95,5 +88,4 @@ public class GreetingController {
 	  return new ResponseEntity<>(HttpStatus.OK);
 	  
 	}
-  
 }
