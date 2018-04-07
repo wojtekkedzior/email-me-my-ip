@@ -21,16 +21,18 @@
 			<td><label>Last Failure</label></td>
 		</tr>
 		<tr th:each="data, iterstat: ${urls}">
-			<td th:text="${data.id}" th:id="|td${iterstat.index}|"></td>
-			<td th:text="${data.state}" th:id="|td${iterstat.index}|"></td>
-			<td th:text="${data.url}" th:id="|td${iterstat.index}|"></td>
-			<td th:text="${data.count}" th:id="|td${iterstat.index}|"></td>
-			<td th:text="${data.lastChecked}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.id}"></td>
+			<td th:text="${data.state}"></td>
+			<td th:text="${data.url}"></td>
+			<td th:text="${data.count}"></td>
+			<td th:text="${data.lastChecked}"></td>
 
-			<td th:text="${data.failures}" th:id="|td${iterstat.index}|"></td>
-			<td th:text="${data.lastFailure}" th:id="|td${iterstat.index}|"></td>
+			<td th:text="${data.failures}"></td>
+			<td th:text="${data.lastFailure}"></td>
 		</tr>
 	</table>
+
+	<a th:href="@{/hello}">adasdad</a>
 
 	<p th:text="'Total Checks: ' + ${totalChecks}" />
 	<p th:text="'Current IP: ' + ${myIp}" />
@@ -39,29 +41,31 @@
 		<table width="1000">
 			<tr>
 				<td><label>IP</label></td>
+				<td><label>Hostname</label></td>
 				<td><label>Last Checked</label></td>
 				<td><label>Checks</label></td>
 				<td><label>Failed Checks</label></td>
 				<td><label>Changed on</label></td>
 			</tr>
-			
+
 			<tr th:each="data, iterstat: ${allCheckedIPs}">
-				<td th:text="${data.ip}" th:id="|td${iterstat.index}|"></td>
-				<td th:text="${data.lastChecked}" th:id="|td${iterstat.index}|"></td>
-				<td th:text="${data.checks}" th:id="|td${iterstat.index}|"></td>
-				<td th:text="${data.failures}" th:id="|td${iterstat.index}|"></td>
-				<td th:text="${data.changeDate}" th:id="|td${iterstat.index}|"></td>
+				<td th:text="${data.ip}"></td>
+				<td th:text="${data.hostname}"></td>
+				<td th:text="${data.lastChecked}"></td>
+				<td th:text="${data.checks}"></td>
+				<td th:text="${data.failures}"></td>
+				<td th:text="${data.changeDate}"></td>
 			</tr>
 		</table>
 	</div>
-	
-	 <button th:onclick="'javascript:sayHello(\'hello\')'">Say Hello</button>
+
+	<button th:onclick="'javascript:sayHello(\'hello\')'">Say Hello</button>
 </body>
 
 <script>
-    function sayHello(text) {
-        alert(text);
-    }
+	function sayHello(text) {
+		alert(text);
+	}
 </script>
 
 </html>

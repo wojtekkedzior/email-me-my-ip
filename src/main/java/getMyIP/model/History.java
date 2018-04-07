@@ -5,7 +5,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import lombok.Data;
+
 @Entity
+@Data
 public class History {
   
   @Id
@@ -13,24 +16,4 @@ public class History {
   private long id;
   
   private int checks;
-
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public int getChecks() {
-    return checks;
-  }
-
-  public void setChecks(int checks) {
-    this.checks = checks;
-  }
-  
-  
-  
-
 }

@@ -3,7 +3,6 @@ package getMyIP.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import getMyIP.model.Ip;
 import getMyIP.model.URLHealthCheck;
 
 @Repository
