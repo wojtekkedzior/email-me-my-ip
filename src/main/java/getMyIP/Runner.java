@@ -20,7 +20,8 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -36,7 +37,7 @@ import getMyIP.repository.URLCheckRepository;
 @EnableScheduling
 public class Runner {
 
-	private static final Logger log = Logger.getLogger(Runner.class);
+	private final Logger log = LoggerFactory.getLogger(Runner.class);
 
 	@Autowired
 	private IpRepository repo;
@@ -58,12 +59,11 @@ public class Runner {
 	public Runner() {
 	}
 
-	@Scheduled(fixedDelay = 1_800_000)
+	@Scheduled(fixedDelay = 43_200_000) //every 12 hours
 	private void checkUrls() {
 		List<String> myList = Arrays.asList(urlsToCheck.split(", "));
 
 		for (String listedUrl : myList) {
-//			listedUrl = listedUrl.trim();
 			log.info("Checking URL: " + listedUrl);
 			URLHealthCheck findByUrl = urlCheckRepo.findByUrl(listedUrl);
 			
@@ -108,12 +108,12 @@ public class Runner {
 
 				urlCheckRepo.save(findByUrl);
 				
-				log.error(e);
+				log.error(e.toString());
 			}
 		}
 	}
 
-	@Scheduled(fixedDelay = 1_800_000)
+	@Scheduled(fixedDelay = 43_200_000)
 	private void checkMyIP() throws UnknownHostException {
 		String inputLine = "";
 
@@ -178,7 +178,7 @@ public class Runner {
 		}
 
 		repo.save(lastValidEntry);
-		History findOne = historyRepo.findOne(1L);
+		History findOne = historyRepo.findById(1L).get();
 		int checks = findOne.getChecks();
 		findOne.setChecks(checks + 1);
 		historyRepo.save(findOne);

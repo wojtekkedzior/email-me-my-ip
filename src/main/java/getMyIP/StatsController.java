@@ -37,7 +37,7 @@ public class StatsController {
 		Iterable<Ip> allCheckedIPs = repo.findAll();
 		model.addAttribute("allCheckedIPs", allCheckedIPs);
 
-		History history = historyRepo.findOne(1l);
+		History history = historyRepo.findById(1l).get();
 		model.addAttribute("totalChecks", history.getChecks());
 
 		long numberOfUrls = urlCheckRepo.count();
