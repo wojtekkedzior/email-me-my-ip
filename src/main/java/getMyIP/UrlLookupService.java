@@ -3,6 +3,8 @@ package getMyIP;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -19,6 +21,16 @@ public class UrlLookupService {
     	// log.info("Looking up " + user);//
     //    String url = String.format("https://api.github.com/users/%s", user);
         //User results = restTemplate.getForObject(url, User.class);
+    	
+    	Timer timer = new Timer();
+    	
+    	timer.schedule(new TimerTask() {
+    		  @Override
+    		  public void run() {
+    		    // Your database code here
+    		  }
+    		}, 2*60*1000);
+    	
     	
     	String state = new String();
     	
@@ -37,6 +49,7 @@ public class UrlLookupService {
 			URL url = new URL(urlToCheck);
 			HttpURLConnection.setFollowRedirects(true);
 			HttpURLConnection http = (HttpURLConnection) url.openConnection();
+			http.setConnectTimeout(5000);
 			log.info("URL: " + urlToCheck + " returned: " + http.getResponseCode());
 
 			state = http.getResponseCode() == 200 ? "up" : "down";
@@ -64,7 +77,8 @@ public class UrlLookupService {
 //
 //			urlCheckRepo.save(findByUrl);
 			
-			log.error(e.toString());
+			log.error(urlToCheck + " " + e.toString());
+			return CompletableFuture.completedFuture("down");
 		}
     	
         return CompletableFuture.completedFuture(state);

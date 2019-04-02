@@ -33,7 +33,7 @@ public class Application extends org.springframework.boot.web.servlet.support.Sp
         executor.setCorePoolSize(10);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("GithubLookup-");
+        executor.setThreadNamePrefix("urlLookUp-");
         executor.initialize();
         return executor;
     }
