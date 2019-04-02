@@ -10,7 +10,7 @@
 
 	<p th:text="'Number of URLS: ' + ${numberOfUrls}" />
 
-	<table width="1000">
+	<table>
 		<tr>
 			<td><label>ID</label></td>
 			<td><label>State</label></td>
@@ -32,13 +32,11 @@
 		</tr>
 	</table>
 
-	<a th:href="@{/hello}">adasdad</a>
-
 	<p th:text="'Total Checks: ' + ${totalChecks}" />
 	<p th:text="'Current IP: ' + ${myIp}" />
 
 	<div>
-		<table width="1000">
+		<table>
 			<tr>
 				<td><label>IP</label></td>
 				<td><label>Hostname</label></td>
@@ -58,14 +56,9 @@
 			</tr>
 		</table>
 	</div>
-
-	<button th:onclick="'javascript:sayHello(\'hello\')'">Say Hello</button>
 </body>
 
 <script>
-	function sayHello(text) {
-		alert(text);
-	}
 </script>
 
 </html>
