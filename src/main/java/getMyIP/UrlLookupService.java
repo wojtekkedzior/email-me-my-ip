@@ -22,16 +22,6 @@ public class UrlLookupService {
     //    String url = String.format("https://api.github.com/users/%s", user);
         //User results = restTemplate.getForObject(url, User.class);
     	
-    	Timer timer = new Timer();
-    	
-    	timer.schedule(new TimerTask() {
-    		  @Override
-    		  public void run() {
-    		    // Your database code here
-    		  }
-    		}, 2*60*1000);
-    	
-    	
     	String state = new String();
     	
 		try {
