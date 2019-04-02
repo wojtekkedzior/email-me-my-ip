@@ -3,14 +3,16 @@ package getMyIP;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -29,10 +31,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import getMyIP.model.History;
 import getMyIP.model.Ip;
-import getMyIP.model.URLHealthCheck;
 import getMyIP.repository.HistoryRepository;
 import getMyIP.repository.IpRepository;
-import getMyIP.repository.URLCheckRepository;
 
 @EnableScheduling
 public class Runner {
@@ -45,9 +45,6 @@ public class Runner {
 	@Autowired
 	private HistoryRepository historyRepo;
 
-	@Autowired
-	private URLCheckRepository urlCheckRepo;
-
 	@Value("${email}")
 	private String email;
 	@Value("${password}")
@@ -55,63 +52,33 @@ public class Runner {
 
 	@Value("${urls.to.check}")
 	private String urlsToCheck;
+	
+	@Autowired
+	private UrlLookupService urlLookupService;
 
 	public Runner() {
 	}
 
 	@Scheduled(fixedDelay = 43_200_000) //every 12 hours
-	private void checkUrls() {
-		List<String> myList = Arrays.asList(urlsToCheck.split(", "));
-
-		for (String listedUrl : myList) {
-			log.info("Checking URL: " + listedUrl);
-			URLHealthCheck findByUrl = urlCheckRepo.findByUrl(listedUrl);
-			
-			if (findByUrl == null) {
-				findByUrl = new URLHealthCheck();
-				findByUrl.setUrl(listedUrl);
-			}
-			
-			Date now = new Date(System.currentTimeMillis());
-			findByUrl.setLastChecked(now);
-
-			try {
-				URL url = new URL(listedUrl);
-				HttpURLConnection.setFollowRedirects(true);
-				HttpURLConnection http = (HttpURLConnection) url.openConnection();
-				log.info("URL: " + listedUrl + " returned: " + http.getResponseCode());
-
-				String state = http.getResponseCode() == 200 ? "up" : "down";
-				
-				findByUrl.setState(state);
-
-				if(http.getResponseCode() != 200) {
-					findByUrl.setFailures(findByUrl.getFailures() +1);
-					findByUrl.setLastFailure(now);
-					
-					log.warn("Got state: " + state + " for URL: " + listedUrl);
-				}
-				
-				findByUrl.setCount(findByUrl.getCount() + 1);
-
-				urlCheckRepo.save(findByUrl);
-
-			} catch (IOException e) {
-				//duhh log an error here
-				
-				String state = "down";
-				findByUrl.setState(state);
-
-				findByUrl.setFailures(findByUrl.getFailures() +1);
-				findByUrl.setLastFailure(now);
-				findByUrl.setCount(findByUrl.getCount() + 1);
-
-				urlCheckRepo.save(findByUrl);
-				
-				log.error(e.toString());
-			}
+	private void checkUrls() throws InterruptedException, ExecutionException {
+		List<CompletableFuture<String>> futures = new ArrayList<CompletableFuture<String>>();
+		
+		long start = System.currentTimeMillis();
+		for (String listedUrl : Arrays.asList(urlsToCheck.split(", "))) {
+			CompletableFuture<String> page = urlLookupService.findUser(listedUrl);
+			futures.add(page);
 		}
-	}
+		
+        // Wait until they are all done
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).join();
+        
+        // Print results, including elapsed time
+        log.info("Elapsed time: " + (System.currentTimeMillis() - start));
+      
+//        for (CompletableFuture<String> completableFuture : futures) {
+//			log.info(completableFuture.get());
+//		}
+		}
 
 	@Scheduled(fixedDelay = 43_200_000)
 	private void checkMyIP() throws UnknownHostException {
