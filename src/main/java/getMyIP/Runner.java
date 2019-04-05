@@ -34,7 +34,7 @@ import getMyIP.model.Ip;
 import getMyIP.repository.HistoryRepository;
 import getMyIP.repository.IpRepository;
 
-@EnableScheduling
+//@EnableScheduling
 public class Runner {
 
 	private final Logger log = LoggerFactory.getLogger(Runner.class);
@@ -59,7 +59,7 @@ public class Runner {
 	public Runner() {
 	}
 
-	@Scheduled(fixedDelay = 43_200_000) //every 12 hours
+//	@Scheduled(fixedDelay = 43_200_000) //every 12 hours
 	private void checkUrls() throws InterruptedException, ExecutionException {
 		List<CompletableFuture<String>> futures = new ArrayList<CompletableFuture<String>>();
 		
@@ -80,7 +80,7 @@ public class Runner {
 //		}
 		}
 
-	@Scheduled(fixedDelay = 43_200_000)
+//	@Scheduled(fixedDelay = 43_200_000)
 	private void checkMyIP() throws UnknownHostException {
 		String inputLine = "";
 
