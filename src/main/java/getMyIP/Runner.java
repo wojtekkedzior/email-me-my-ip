@@ -34,7 +34,7 @@ import getMyIP.model.Ip;
 import getMyIP.repository.HistoryRepository;
 import getMyIP.repository.IpRepository;
 
-//@EnableScheduling
+@EnableScheduling
 public class Runner {
 
 	private final Logger log = LoggerFactory.getLogger(Runner.class);
@@ -52,35 +52,33 @@ public class Runner {
 
 	@Value("${urls.to.check}")
 	private String urlsToCheck;
-	
+
 	@Autowired
 	private UrlLookupService urlLookupService;
 
 	public Runner() {
 	}
 
-//	@Scheduled(fixedDelay = 43_200_000) //every 12 hours
+	@Scheduled(fixedDelay = 43_200_000) // every 12 hours
 	private void checkUrls() throws InterruptedException, ExecutionException {
 		List<CompletableFuture<String>> futures = new ArrayList<CompletableFuture<String>>();
-		
-		long start = System.currentTimeMillis();
-		for (String listedUrl : Arrays.asList(urlsToCheck.split(", "))) {
-			CompletableFuture<String> page = urlLookupService.findUser(listedUrl);
-			futures.add(page);
-		}
-		
-        // Wait until they are all done
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).join();
-        
-        // Print results, including elapsed time
-        log.info("Elapsed time: " + (System.currentTimeMillis() - start));
-      
-//        for (CompletableFuture<String> completableFuture : futures) {
-//			log.info(completableFuture.get());
-//		}
-		}
 
-//	@Scheduled(fixedDelay = 43_200_000)
+		long start = System.currentTimeMillis();
+
+		Arrays.asList(urlsToCheck.split(", ")).stream().forEach(url -> {
+			CompletableFuture<String> page = urlLookupService.findUser(url);
+			futures.add(page);
+		});
+
+		// Wait until they are all done
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).join();
+
+		// Print results, including elapsed time
+		log.info("Elapsed time: " + (System.currentTimeMillis() - start));
+
+	}
+
+	@Scheduled(fixedDelay = 43_200_000)
 	private void checkMyIP() throws UnknownHostException {
 		String inputLine = "";
 
@@ -176,5 +174,4 @@ public class Runner {
 			log.info("Failed to send email:  " + e.getMessage());
 		}
 	}
-
 }

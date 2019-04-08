@@ -27,7 +27,7 @@ public class UrlLookupService {
 	private static final String DOWN = "DOWN";
 	
     @Async
-    public CompletableFuture<String> findUser(String urlToCheck) throws InterruptedException {
+    public CompletableFuture<String> findUser(String urlToCheck) {
     	URLHealthCheck findByUrl = urlCheckRepo.findByUrl(urlToCheck);
     	Date now = new Date(System.currentTimeMillis());
 		try {
